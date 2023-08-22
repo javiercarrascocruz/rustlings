@@ -18,22 +18,16 @@ fn main() {
         let status_shared = Arc::clone(&status);
         let handle = thread::spawn(move || {
             thread::sleep(Duration::from_millis(250));
-            match status_shared.lock() {
-                Ok(mut i) => {
-                    i.jobs_completed += 1;
-                }
-                _ => {}
+            if let Ok(mut i) = status_shared.lock() {
+                i.jobs_completed += 1;
             }
         });
         handles.push(handle);
     }
     for handle in handles {
         handle.join().unwrap();
-        match status.lock() {
-            Ok(i) => {
-                println!("jobs completed {}", i.jobs_completed);
-            }
-            _ => {}
+        if let Ok(i) = status.lock() {
+            println!("jobs completed {}", i.jobs_completed);
         }
     }
 }
